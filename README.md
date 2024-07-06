@@ -7,6 +7,6 @@ En ce qui concerne ce repository, voici comment sont rangé mes fichiers :
 
 Live = Algorithmes qui tourne en live sur un VPS en compte démo afin de tester la robustesse du projet avant l'implémentation en réel. 
 Optimisation = Algorithmes abouti, qui est en train d'être tester sur plusieurs paires, qui a déjà subi des optimisations. 
-Testing = Algorithmes plus ou moins abouti, qui nécessite des test supplémentaire. 
+Testing = Algorithmes plus ou moins abouti, qui nécessite des test supplémentaire .
 
 En ce qui concerne les algorithmes, voici un lien de mon portfolio MyFxbook : https://www.myfxbook.com/portfolio
