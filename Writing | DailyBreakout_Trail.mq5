@@ -3,7 +3,7 @@
 //|                                  Copyright 2024, MetaQuotes Ltd. |
 //|                                             https://www.mql5.com |
 //+------------------------------------------------------------------+
-#property copyright "Copyright 2024, MetaQuotes Ltd."
+#property copyright "gros beau goss"
 #property link      "https://www.mql5.com"
 #property version   "1.00"
 
@@ -55,14 +55,15 @@ void OnTick()
       lastCandleLow = iLow(_Symbol, PERIOD_D1,1);
 
        if(ask < lastCandleHigh && bid > lastCandleLow) {
-            trade.BuyStop(positionSize, lastCandleHigh, _Symbol);
-            trade.SellStop(positionSize, lastCandleLow, _Symbol);
-       }
-      // on fait appel au trailingstop ici même si le code est dans le void en dessous. 
-      trailingStop();
+            trade.BuyStop(positionSize, lastCandleHigh, _Symbol, lastCandleLow);
+            trade.SellStop(positionSize, lastCandleLow, _Symbol, lastCandleHigh);
+       }    
     }
+    
+// on fait appel au trailingstop ici même si le code est dans le void en dessous. 
+trailingStop();
 
-  }
+}
 //+------------------------------------------------------------------+
 
 // une fonction void pour le trailing stop en deghors de on tick
@@ -75,5 +76,46 @@ void trailingStop(){
 // i position total -1, en mql5 l'index 0 est égal a la premiere valeur. comme en python. 
 // donc pour avoir 
  
-
+   for (int i = PositionsTotal()-1; i>=0; i--) {
+      ulong positionTicket = PositionGetTicket(i); // on va choper le ticket du trade
+      
+      
+      
+      if(PositionSelectByTicket(positionTicket) && PositionGetInteger(POSITION_TYPE) == 0){
+      
+         double positionSL = PositionGetDouble(POSITION_SL); // variable qui va stocker le stop loss
+         double positionTP = PositionGetDouble(POSITION_TP); // variable qui va stocker le take profit
+         
+         // on va comparer le sl de la position avec le prix, pour savoir a quell moment on souhaite trial le stop.
+         double positionOpenPrice = PositionGetDouble(POSITION_PRICE_OPEN);
+         
+         double pipsInProfit = ask - positionOpenPrice;
+         double trailingSL = lastCandleLow + pipsInProfit;
+         
+         // condition pour savoir quand on est en profit pour savoir quand commencer le trailing. 
+         // et dire que le trail ne peux pas aller plus bas que le vrai stop loss de base. 
+         if(pipsInProfit > 0 && trailingSL > positionSL){
+            trade.PositionModify(positionTicket,trailingSL,positionTP);
+         }   
+      }
+      
+      if(PositionSelectByTicket(positionTicket) && PositionGetInteger(POSITION_TYPE) == 1){
+      
+         double positionSL = PositionGetDouble(POSITION_SL); // variable qui va stocker le stop loss
+         double positionTP = PositionGetDouble(POSITION_TP); // variable qui va stocker le take profit
+         
+         // on va comparer le sl de la position avec le prix, pour savoir a quell moment on souhaite trial le stop.
+         double positionOpenPrice = PositionGetDouble(POSITION_PRICE_OPEN);
+         
+         double pipsInProfit = positionOpenPrice - bid;
+         double trailingSL = lastCandleHigh - pipsInProfit;
+         
+         // condition pour savoir quand on est en profit pour savoir quand commencer le trailing. 
+         // et dire que le trail ne peux pas aller plus bas que le vrai stop loss de base. 
+         if(pipsInProfit > 0 && trailingSL < positionSL){
+         
+            trade.PositionModify(positionTicket,trailingSL,positionTP);
+         }   
+      }
+   }
 }
